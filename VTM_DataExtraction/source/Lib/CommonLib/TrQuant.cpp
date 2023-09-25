@@ -874,6 +874,8 @@ void TrQuant::xIT( const TransformUnit &tu, const ComponentID &compID, const CCo
   }
 }
 
+
+
 /** Wrapper function between HM interface and core NxN transform skipping
  */
 void TrQuant::xITransformSkip(const CCoeffBuf     &pCoeff,
@@ -903,6 +905,8 @@ void TrQuant::xQuant(TransformUnit &tu, const ComponentID &compID, const CCoeffB
 void TrQuant::transformNxN(TransformUnit &tu, const ComponentID &compID, const QpParam &cQP, TrModeList &trModes,
                            const int maxCand)
 {
+
+  //JOAO
         CodingStructure &cs = *tu.cs;
   const CompArea &rect      = tu.blocks[compID];
   const uint32_t width      = rect.width;
