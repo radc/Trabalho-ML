@@ -1887,6 +1887,12 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
     if (pCfg->getSwitchPOC() != pcPic->poc || ctuRsAddr >= pCfg->getDebugCTU())
     {
       m_pcCuEncoder->compressCtu(cs, ctuArea, ctuRsAddr, prevQP, currQP);
+
+      uint32_t* pArray = (uint32_t*) malloc(sizeof(uint32_t)*6);      
+      cs.getNumCuPuTuOffset(pArray);
+      printf("Ola Mundo: %u\n",pArray[0]);
+      
+      
 #if GREEN_METADATA_SEI_ENABLED
       FeatureCounterStruct m_featureCounter = pcPic->getFeatureCounter();
       countFeatures(m_featureCounter, cs,ctuArea);

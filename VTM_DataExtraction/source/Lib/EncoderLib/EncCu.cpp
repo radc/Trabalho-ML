@@ -55,6 +55,33 @@
 
 #define GET_CU_DATA 1
 
+void printCuData(CodingStructure*& tempCS, Partitioner& partitioner)
+{
+  int  stridee = (int) tempCS->getOrgBuf().Y().stride;
+  long acc     = 0;
+  for (int i = 0; i < (int) tempCS->getOrgBuf().Y().height; i++)
+  {
+    for (int j = 0; j < (int) tempCS->getOrgBuf().Y().width; j++)
+    {
+      acc += tempCS->getOrgBuf().Y().buf[j + stridee * i];
+      //printf("%d ", tempCS->getOrgBuf().Y().buf[j + stridee * i]);
+    }
+    //printf("\n");
+  }
+  int pelAverage = (int) acc / (tempCS->area.lwidth() * tempCS->area.lheight());
+
+  // printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%d\t%llu\t%d\t%d\t%d\t%d\n", partitioner.currDepth,
+  //        (int) partitioner.chType, (int) partitioner.currBtDepth, (int) partitioner.currMtDepth,
+  //        (int) partitioner.treeType, (int) partitioner.currQtDepth, (int) partitioner.currTrDepth,
+  //        (int) partitioner.modeType, (int) tempCS->area.lx(), (int) tempCS->area.ly(), tempCS->area.lwidth(),
+  //        tempCS->area.lheight(), tempCS->cost, tempCS->baseQP, tempCS->dist, (int) tempCS->fracBits,
+  //        (int) tempCS->getOrgBuf().Y().width, (int) tempCS->getOrgBuf().Y().height, pelAverage
+
+  // );
+
+  
+}
+
 //! \ingroup EncoderLib
 //! \{
 
@@ -483,6 +510,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   CHECK(maxCostAllowed < 0, "Wrong value of maxCostAllowed!");
 
   // printf("xCompressCU\n"); RADC
+  printCuData(tempCS, partitioner);
 
   uint32_t compBegin;
   uint32_t numComp;
@@ -656,7 +684,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   if( !m_modeCtrl->anyMode() )
   {
     m_modeCtrl->finishCULevel( partitioner );
-    printf("Early Return 1\n");
+    //printf("Early Return 1\n");
     return;
   }
 
@@ -703,7 +731,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   }
   do
   {
-    printf("Do-while 710\n");
+    //printf("Do-while 710\n");
     for (int i = compBegin; i < (compBegin + numComp); i++)
     {
       ComponentID comID = jointPLT ? (ComponentID)compBegin : ((i > 0) ? COMPONENT_Cb : COMPONENT_Y);
@@ -813,7 +841,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         }
         if (!skipSecColorSpace && !tempCS->firstColorSpaceTestOnly)
         {
-          printf("Intra 1\n");
+          //printf("Intra 1\n");
           xCheckRDCostIntra(tempCS, bestCS, partitioner, currTestMode, (m_pcEncCfg->getRGBFormatFlag() ? false : true));
         }
 
@@ -835,42 +863,9 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       }
       else
       {
-        printf("Intra 2\n");
+        // printf("Intra 2\n");
         xCheckRDCostIntra(tempCS, bestCS, partitioner, currTestMode, false);
-         printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%d\t%ld\t%d\t%d\t%d\n",
-          partitioner.currDepth,
-          (int) partitioner.chType,
-          (int) partitioner.currBtDepth,
-          (int) partitioner.currMtDepth,
-          (int) partitioner.treeType,
-          (int) partitioner.currQtDepth,
-          (int) partitioner.currTrDepth,
-          (int) partitioner.modeType,
-          (int) tempCS->area.lx(),
-          (int) tempCS->area.ly(),
-          tempCS->area.lwidth(),
-          tempCS->area.lheight(),
-          tempCS->cost,
-          tempCS->baseQP,          
-          tempCS->dist,
-          (int) tempCS->fracBits,
-          (int) tempCS->getOrgBuf().Y().width,
-          (int) tempCS->getOrgBuf().Y().height
-          
-        ); 
-
-      
-
-      int stridee = tempCS->getOrgBuf().Y().stride;
-      for (int i = 0; i < (int) tempCS->getOrgBuf().Y().height; i++)
-      {
-        for (int j = 0; j < (int) tempCS->getOrgBuf().Y().width; j++)
-        {
-          printf("%d ",tempCS->getOrgBuf().Y().buf[(j+tempCS->area.Y().x) + stridee * (i+tempCS->area.Y().y)]);
-        }
-        printf("\n");
-        
-      }   
+        //printCuData(tempCS, partitioner);
        
       }
 #if JVET_AE0057_MTT_ET
@@ -891,14 +886,14 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
     else if (currTestMode.type == ETM_PALETTE)
     {
-      printf("Intra PLT\n");
+      // printf("Intra PLT\n");
       xCheckPLT( tempCS, bestCS, partitioner, currTestMode );
       splitRdCostBest[CTU_LEVEL] = bestCS->cost;
       tempCS->splitRdCostBest = splitRdCostBest;
     }
     else if (currTestMode.type == ETM_IBC)
     {
-      printf("Intra IBC\n");
+      // printf("Intra IBC\n");
       xCheckRDCostIBCMode(tempCS, bestCS, partitioner, currTestMode);
       splitRdCostBest[CTU_LEVEL] = bestCS->cost;
       tempCS->splitRdCostBest = splitRdCostBest;
@@ -953,47 +948,10 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
-        printf("Check Split 960\n");
+        // printf("Check Split 960\n");       
         
-      //  printf("Intra 2\n"); 
-        // printf("\tcurrD:%d \n\tchType:%d \n\tcurrBtD:%d \n\tcurrMtD:%d \n\ttt:%d \n\tqtD:%d \n\ttrD:%d \n\tmodeType:%d \n\tlx:%d \n\tly:%d \n\tlw:%d \n\tlh:%d \n\tcost:%g \n\tbaseQp:%d \n\tdist:%ld \n\tfracbits%d\n",
-      //   printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%d\t%ld\t%d\t%d\t%d\t%d\n",
-      //     partitioner.currDepth,
-      //     (int) partitioner.chType,
-      //     (int) partitioner.currBtDepth,
-      //     (int) partitioner.currMtDepth,
-      //     (int) partitioner.treeType,
-      //     (int) partitioner.currQtDepth,
-      //     (int) partitioner.currTrDepth,
-      //     (int) partitioner.modeType,
-      //     (int) tempCS->area.lx(),
-      //     (int) tempCS->area.ly(),
-      //     tempCS->area.lwidth(),
-      //     tempCS->area.lheight(),
-      //     tempCS->cost,
-      //     tempCS->baseQP,          
-      //     tempCS->dist,
-      //     (int) tempCS->fracBits,
-      //     (int) tempCS->getOrgBuf().Y().width,
-      //     (int) tempCS->getOrgBuf().Y().height,
-      //     numRoundRdo
-      //   ); 
-
-      
-
-      // int stridee = tempCS->getOrgBuf().Y().stride;
-      // for (int i = 0; i < (int) tempCS->getOrgBuf().Y().height; i++)
-      // {
-      //   for (int j = 0; j < (int) tempCS->getOrgBuf().Y().width; j++)
-      //   {
-      //     printf("%d ",tempCS->getOrgBuf().Y().buf[(j+tempCS->area.Y().x) + stridee * (i+tempCS->area.Y().y)]);
-      //   }
-      //   printf("\n");
-        
-      // }
-      
         xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
-        printf("Retorno Split 1000\n");
+        // printf("Retorno Split 1000\n");
         tempCS->splitRdCostBest = splitRdCostBest;
         //recover cons modes
         tempCS->modeType = partitioner.modeType = modeTypeParent;
@@ -1241,7 +1199,7 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
 #endif
     )
   {
-    printf("Best 1240\n");
+    // printf("Best 1240\n");
     xCheckBestMode( tempCS, bestCS, partitioner, encTestMode );
     return;
   }
@@ -1318,49 +1276,13 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
       tempSubCS->bestParent = bestSubCS->bestParent = bestCS;
       double newMaxCostAllowed = isLuma(partitioner.chType) ? std::min(encTestMode.maxCostAllowed, bestCS->cost - m_pcRdCost->calcRdCost(tempCS->fracBits, tempCS->dist)) : MAX_DOUBLE;
       newMaxCostAllowed = std::max(0.0, newMaxCostAllowed);
-      // // printf("xCompressSubCu 1\n"); 
-      // //  printf("Intra 2\n"); 
-      //   // printf("\tcurrD:%d \n\tchType:%d \n\tcurrBtD:%d \n\tcurrMtD:%d \n\ttt:%d \n\tqtD:%d \n\ttrD:%d \n\tmodeType:%d \n\tlx:%d \n\tly:%d \n\tlw:%d \n\tlh:%d \n\tcost:%g \n\tbaseQp:%d \n\tdist:%ld \n\tfracbits%d\n",
-      //   printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%d\t%ld\t%d\t%d\t%d\n",
-      //     partitioner.currDepth,
-      //     (int) partitioner.chType,
-      //     (int) partitioner.currBtDepth,
-      //     (int) partitioner.currMtDepth,
-      //     (int) partitioner.treeType,
-      //     (int) partitioner.currQtDepth,
-      //     (int) partitioner.currTrDepth,
-      //     (int) partitioner.modeType,
-      //     (int) bestCS->area.lx(),
-      //     (int) bestCS->area.ly(),
-      //     bestCS->area.lwidth(),
-      //     bestCS->area.lheight(),
-      //     bestCS->cost,
-      //     bestCS->baseQP,          
-      //     bestCS->dist,
-      //     (int) bestCS->fracBits,
-      //     (int) bestCS->getOrgBuf().Y().width,
-      //     (int) bestCS->getOrgBuf().Y().height
-      //   ); 
-
-      // int stridee = bestCS->getOrgBuf().Y().stride;
-      // for (int i = 0; i < (int) bestCS->getOrgBuf().Y().height; i++)
-      // {
-      //   for (int j = 0; j < (int) bestCS->getOrgBuf().Y().width; j++)
-      //   {
-      //     printf("%d ",bestCS->getOrgBuf().Y().buf[(j+bestCS->area.Y().x) + stridee * (i+bestCS->area.Y().y)]);
-      //   }
-      //   printf("\n");
-        
-      // }
-      
-      
-      printf("xCompress 1350\n");
+  
       xCompressCU(tempSubCS, bestSubCS, partitioner, newMaxCostAllowed);
       tempSubCS->bestParent = bestSubCS->bestParent = nullptr;
 
       if( bestSubCS->cost == MAX_DOUBLE )
       {
-        printf("MaxDouble\n");
+        // printf("MaxDouble\n");
         CHECK( split == CU_QUAD_SPLIT, "Split decision reusing cannot skip quad split" );
         tempCS->cost = MAX_DOUBLE;
         tempCS->costDbOffset = 0;
@@ -1507,7 +1429,7 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
       tempCS->initSubStructure(*tempCSChroma, partitioner.chType, partitioner.currArea(), false);
       tempCS->initSubStructure(*bestCSChroma, partitioner.chType, partitioner.currArea(), false);
       tempCS->treeType = TREE_D;
-      printf("xCompressSubCu 2\n");
+      // printf("xCompressSubCu 2\n");
       xCompressCU(tempCSChroma, bestCSChroma, partitioner);
 
       // attach chromaCS to luma CS and update cost
