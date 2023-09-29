@@ -1560,6 +1560,23 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   m_pcInterSearch->resetUniMvList();
   ::memset(g_isReusedUniMVsFilled, 0, sizeof(g_isReusedUniMVsFilled));
   encodeCtus( pcPic, bCompressEntireSlice, bFastDeltaQP, m_pcLib );
+
+  int numCUs = pcPic->cs->getNumCu();
+  for (int i = 0; i < numCUs; i++)
+  {
+    printf("%d\t%d\t%d\t%d\t%d\t%d\n",
+      i,
+      pcPic->cs->cus[i]->depth,
+      pcPic->cs->cus[i]->Y().x,
+      pcPic->cs->cus[i]->Y().y,
+      pcPic->cs->cus[i]->Y().width,
+      pcPic->cs->cus[i]->Y().height
+    );
+  }
+  printf("\n");
+  
+  
+
   if (checkPLTRatio)
   {
     m_pcLib->checkPltStats(pcPic);
@@ -1887,11 +1904,6 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
     if (pCfg->getSwitchPOC() != pcPic->poc || ctuRsAddr >= pCfg->getDebugCTU())
     {
       m_pcCuEncoder->compressCtu(cs, ctuArea, ctuRsAddr, prevQP, currQP);
-
-      uint32_t* pArray = (uint32_t*) malloc(sizeof(uint32_t)*6);      
-      cs.getNumCuPuTuOffset(pArray);
-      printf("Ola Mundo: %u\n",pArray[0]);
-      
       
 #if GREEN_METADATA_SEI_ENABLED
       FeatureCounterStruct m_featureCounter = pcPic->getFeatureCounter();
