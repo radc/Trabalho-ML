@@ -120,34 +120,35 @@ void printCuData(CodingStructure*& tempCS, Partitioner& partitioner)
   //22 - max
   //23 - (max - min)
   //24 - pelDiffFullDiagAvg
-  //      0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16    17  18  19  20  21  22  23  24
+  //25 - 
+  //      0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16   17  18  19  20  21  22  23  24  25
 
-  printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%d\t%d\t%llu\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
-         poc,
-         (int) partitioner.chType, 
-         partitioner.currDepth, 
-         (int) partitioner.currBtDepth, 
-         (int) partitioner.currMtDepth,
-         (int) partitioner.treeType, 
-         (int) partitioner.currQtDepth, 
-         (int) partitioner.currTrDepth,
-         (int) partitioner.modeType, 
-         (int) tempCS->area.lx(), 
-         (int) tempCS->area.ly(), 
-         tempCS->area.lwidth(),
-         tempCS->area.lheight(), 
-         tempCS->cost, 
-         tempCS->baseQP, 
-         qp, tempCS->dist, 
-         (int) tempCS->fracBits, 
-         pelAverage,
-         pelDiagonalAverage, 
-         pelDiffDiagonal, 
-         min, 
-         max, 
-         (max - min), 
-         pelDiffFullDiagAvg,
-         //tempCS->pps.
+  printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%d\t%d\t%lu\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+         poc,                                                       //0
+         (int) partitioner.chType,                                  //1
+         partitioner.currDepth,                                     //2
+         (int) partitioner.currBtDepth,                             //3  
+         (int) partitioner.currMtDepth,                             //4
+         (int) partitioner.treeType,                                //5
+         (int) partitioner.currQtDepth,                             //6
+         (int) partitioner.currTrDepth,                             //7
+         (int) partitioner.modeType,                                //8
+         (int) tempCS->area.lx(),                                   //9
+         (int) tempCS->area.ly(),                                   //10
+         tempCS->area.lwidth(),                                     //11
+         tempCS->area.lheight(),                                    //12
+         tempCS->cost,                                              //13
+         tempCS->baseQP,                                            //14
+         qp,                                                        //15
+         tempCS->dist,                                              //16
+         (int) tempCS->fracBits,                                    //17
+         pelAverage,                                                //18
+         pelDiagonalAverage,                                        //19
+         pelDiffDiagonal,                                           //20
+         min,                                                       //21
+         max,                                                       //22
+         (max - min),                                               //23
+         pelDiffFullDiagAvg                                         //24         
   );
 }
 
