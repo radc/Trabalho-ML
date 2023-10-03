@@ -1561,10 +1561,11 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   ::memset(g_isReusedUniMVsFilled, 0, sizeof(g_isReusedUniMVsFilled));
   encodeCtus( pcPic, bCompressEntireSlice, bFastDeltaQP, m_pcLib );
 
+  FILE *fp = fopen("desfecho.csv","a");
   int numCUs = pcPic->cs->getNumCu();
   for (int i = 0; i < numCUs; i++)
-  {
-    printf("%d\t%d\t%d\t%d\t%d\t%d\n",
+  {    
+    fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\n",
       i,
       pcPic->cs->cus[i]->depth,
       pcPic->cs->cus[i]->Y().x,
@@ -1573,8 +1574,7 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
       pcPic->cs->cus[i]->Y().height
     );
   }
-  printf("\n");
-  
+  fclose(fp); 
   
 
   if (checkPLTRatio)

@@ -59,27 +59,96 @@ void printCuData(CodingStructure*& tempCS, Partitioner& partitioner)
 {
   int  stridee = (int) tempCS->getOrgBuf().Y().stride;
   long acc     = 0;
+  int min = 1000, max = -1;
+
   for (int i = 0; i < (int) tempCS->getOrgBuf().Y().height; i++)
   {
     for (int j = 0; j < (int) tempCS->getOrgBuf().Y().width; j++)
     {
-      acc += tempCS->getOrgBuf().Y().buf[j + stridee * i];
-      //printf("%d ", tempCS->getOrgBuf().Y().buf[j + stridee * i]);
+      Pel currPel = tempCS->getOrgBuf().Y().buf[j + stridee * i];
+      acc += currPel;
+      if(currPel > max) max = currPel;
+      if(currPel < min) min = currPel;
+      printf("%d ", tempCS->getOrgBuf().Y().buf[j + stridee * i]);
     }
-    //printf("\n");
+    printf("\n");
   }
   int pelAverage = (int) acc / (tempCS->area.lwidth() * tempCS->area.lheight());
-
-  // printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%d\t%llu\t%d\t%d\t%d\t%d\n", partitioner.currDepth,
-  //        (int) partitioner.chType, (int) partitioner.currBtDepth, (int) partitioner.currMtDepth,
-  //        (int) partitioner.treeType, (int) partitioner.currQtDepth, (int) partitioner.currTrDepth,
-  //        (int) partitioner.modeType, (int) tempCS->area.lx(), (int) tempCS->area.ly(), tempCS->area.lwidth(),
-  //        tempCS->area.lheight(), tempCS->cost, tempCS->baseQP, tempCS->dist, (int) tempCS->fracBits,
-  //        (int) tempCS->getOrgBuf().Y().width, (int) tempCS->getOrgBuf().Y().height, pelAverage
-
-  // );
-
   
+  Pel pelTopLeft = tempCS->getOrgBuf().Y().buf[0];
+  Pel pelTopRight = tempCS->getOrgBuf().Y().buf[tempCS->getOrgBuf().Y().width-1];
+  Pel pelBottomLeft = tempCS->getOrgBuf().Y().buf[stridee * (tempCS->getOrgBuf().Y().height-1)];
+  Pel pelBottomRight = tempCS->getOrgBuf().Y().buf[stridee * (tempCS->getOrgBuf().Y().height-1)+tempCS->getOrgBuf().Y().width-1];
+
+  int pelDiagonalAverage = (int) (pelTopLeft + pelTopRight + pelBottomLeft + pelBottomRight)>>2;
+
+  int pelDiffDiagonal = 
+    abs(pelTopLeft - pelTopRight) +
+    abs(pelTopLeft - pelBottomLeft) +
+    abs(pelTopLeft - pelBottomRight) +
+    abs(pelTopRight - pelBottomLeft) +
+    abs(pelTopRight - pelBottomRight) +
+    abs(pelBottomLeft - pelBottomRight);
+
+  int pelDiffFullDiagAvg = abs(pelDiagonalAverage - pelDiffDiagonal);
+
+  int poc = tempCS->slice->getPic()->poc;
+  int qp = tempCS->slice->getSliceQp();
+
+  //0 - poc
+  //1 - chtype
+  //2 - currDepth
+  //3 - currBtDepth
+  //4 - currMtDepth
+  //5 - treeType
+  //6 - currQtDepth
+  //7 - currTrDepth
+  //8 - modeType
+  //9 - lx
+  //10 - ly
+  //11 - lwidth
+  //12 - lheight
+  //13 - cost
+  //14 - baseQp
+  //15 - qp
+  //16 - dist
+  //17 - fracbits
+  //18 - pelAverage
+  //19 - pelDiagonalAverage
+  //20 - pelDiffDiagonal
+  //21 - min
+  //22 - max
+  //23 - (max - min)
+  //24 - pelDiffFullDiagAvg
+  //      0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16    17  18  19  20  21  22  23  24
+
+  printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%d\t%d\t%llu\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+         poc,
+         (int) partitioner.chType, 
+         partitioner.currDepth, 
+         (int) partitioner.currBtDepth, 
+         (int) partitioner.currMtDepth,
+         (int) partitioner.treeType, 
+         (int) partitioner.currQtDepth, 
+         (int) partitioner.currTrDepth,
+         (int) partitioner.modeType, 
+         (int) tempCS->area.lx(), 
+         (int) tempCS->area.ly(), 
+         tempCS->area.lwidth(),
+         tempCS->area.lheight(), 
+         tempCS->cost, 
+         tempCS->baseQP, 
+         qp, tempCS->dist, 
+         (int) tempCS->fracBits, 
+         pelAverage,
+         pelDiagonalAverage, 
+         pelDiffDiagonal, 
+         min, 
+         max, 
+         (max - min), 
+         pelDiffFullDiagAvg,
+         //tempCS->pps.
+  );
 }
 
 //! \ingroup EncoderLib
@@ -510,7 +579,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   CHECK(maxCostAllowed < 0, "Wrong value of maxCostAllowed!");
 
   // printf("xCompressCU\n"); RADC
-  printCuData(tempCS, partitioner);
+  //printCuData(tempCS, partitioner);
 
   uint32_t compBegin;
   uint32_t numComp;
@@ -914,6 +983,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       int signalModeConsVal = tempCS->signalModeCons( getPartSplit( currTestMode ), partitioner, modeTypeParent );
       int numRoundRdo = signalModeConsVal == LDT_MODE_TYPE_SIGNAL ? 2 : 1;
       bool skipInterPass = false;
+      
       for( int i = 0; i < numRoundRdo; i++ )
       {
         //change cons modes
@@ -949,7 +1019,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         }
 
         // printf("Check Split 960\n");       
-        
+        printCuData(tempCS, partitioner);
         xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
         // printf("Retorno Split 1000\n");
         tempCS->splitRdCostBest = splitRdCostBest;
