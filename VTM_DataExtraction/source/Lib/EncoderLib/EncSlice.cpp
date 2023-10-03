@@ -44,6 +44,7 @@
 #include "CommonLib/dtrace_blockstatistics.h"
 #endif
 
+extern void printCuDataBuffer();
 
 #include <math.h>
 
@@ -1561,6 +1562,7 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   ::memset(g_isReusedUniMVsFilled, 0, sizeof(g_isReusedUniMVsFilled));
   encodeCtus( pcPic, bCompressEntireSlice, bFastDeltaQP, m_pcLib );
 
+  printCuDataBuffer();
   FILE *fp = fopen("desfecho.csv","a");
   int numCUs = pcPic->cs->getNumCu();
   for (int i = 0; i < numCUs; i++)
