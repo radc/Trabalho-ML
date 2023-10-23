@@ -16,8 +16,10 @@ int main(int argc, char *argv[])
     }
 
     FILE *fptr, *dest;
-    fptr = fopen("../vidyo4_720p_60fps.y4m", "r");
-    dest = fopen("../vidyo4_720p_60fps.yuv", "w");
+    fptr = fopen("../Sequences/vidyo4_720p_60fps.y4m", "r");
+    dest = fopen("../Sequences/vidyo4_720p_60fps.yuv", "w");
+
+    
 
     char c = '\0';
 
