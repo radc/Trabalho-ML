@@ -12,7 +12,7 @@ EXEC_STR.append(AI_CFG_PATH)
 EXEC_STR.append("-c")
 EXEC_STR.append(SQ_CFG_PATH)
 EXEC_STR.append("--InputFile="+SQ_PATH)
-EXEC_STR.append("--FramesToBeEncoded=81")
+EXEC_STR.append("--FramesToBeEncoded=20")
 
 EXEC = " ".join(EXEC_STR)
 os.system(EXEC)

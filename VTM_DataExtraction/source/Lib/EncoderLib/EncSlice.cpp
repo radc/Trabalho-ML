@@ -1574,8 +1574,9 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   int numCUs = pcPic->cs->getNumCu();
   for (int i = 0; i < numCUs; i++)
   {    
-    fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\n",
+    fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
       i,
+      pcPic->getPOC(),
       pcPic->cs->cus[i]->depth,
       pcPic->cs->cus[i]->Y().x,
       pcPic->cs->cus[i]->Y().y,

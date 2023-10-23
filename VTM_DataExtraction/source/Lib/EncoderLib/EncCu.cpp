@@ -122,30 +122,45 @@ int      bufferIdx = 0;
 #endif
 
 extern void printCuDataBuffer();
+// bool firstPrint = true;
 
 void printCuDataBuffer()
-{
+{  
+
   FILE *fp = fopen("cudata.csv","a");
+
+  // if(firstPrint){
+  //   fprintf(fp,"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+  //     "baseqp","cost","cunumberpel","currbtdepth","currdepth","currmtdepth","currqtdepth","currtrdepth","diagavg",
+  //     "diagsad","diavar","diffminmax","distortion","fracbits","height","max","min","modetype","poc","qp",
+  //     "pelavg","pelcornersavg","peldiffdiagonal","peldifffullcorneravg","squaredcu","videoresheight","videoreswidth",
+  //     "treetype","width","x","y","prevpocheight","prevpocwidth","thisheightminusprevheight","thiswidthminusprevwidth",
+  //     "thissizeminusprevsize"
+  //   );
+  //   firstPrint = false;
+  // }
+
+
   for (int i = 0; i < bufferIdx; i++)
   {
-    fprintf(fp, "%d\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%ld\t%ld\t%d\t%ld\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+    fprintf(fp,
+            "%d\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%ld\t%ld\t%d\t%ld\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%"
+            "d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
 
-            buffer[i].baseQp, buffer[i].cost, buffer[i].cuNumberPel,
-            buffer[i].currBtDepth, buffer[i].currDepth, buffer[i].currMtDepth,
-            buffer[i].currQtDepth, buffer[i].currTrDepth, buffer[i].diagAverage,
-            buffer[i].diagSad, buffer[i].diagVar, buffer[i].diffMinMax,
-            buffer[i].distorion, buffer[i].fracBits, buffer[i].height, buffer[i].max,
-            buffer[i].min, buffer[i].modeType, buffer[i].poc, buffer[i].qp,
-            buffer[i].pelAverage, buffer[i].pelCornersAverage, buffer[i].pelDiffDiagonal,
-            buffer[i].pelDiffFullCornerAvg, buffer[i].squaredCu, buffer[i].videoResHeight,
-            buffer[i].videoResWidth, buffer[i].treeType, buffer[i].width, buffer[i].x,
-            buffer[i].y,
-            buffer[i].prevPocHeight,buffer[i].prevPocWidth,
-            buffer[i].thisHeightMinusPrevHeight, buffer[i].thisWidthMinusPrevWidth, buffer[i].thisSizeMinusPrevSize
-            
+            buffer[i].baseQp, buffer[i].cost, buffer[i].cuNumberPel, buffer[i].currBtDepth, buffer[i].currDepth,  //5
+            buffer[i].currMtDepth, buffer[i].currQtDepth, buffer[i].currTrDepth, buffer[i].diagAverage,           //4
+            buffer[i].diagSad, buffer[i].diagVar, buffer[i].diffMinMax, buffer[i].distorion, buffer[i].fracBits,  //5
+            buffer[i].height, buffer[i].max, buffer[i].min, buffer[i].modeType, buffer[i].poc, buffer[i].qp,      //6
+            buffer[i].pelAverage, buffer[i].pelCornersAverage, buffer[i].pelDiffDiagonal,                         //3
+            buffer[i].pelDiffFullCornerAvg, buffer[i].squaredCu, buffer[i].videoResHeight, buffer[i].videoResWidth,//4
+            buffer[i].treeType, buffer[i].width, buffer[i].x, buffer[i].y, buffer[i].prevPocHeight,               //5
+            buffer[i].prevPocWidth, buffer[i].thisHeightMinusPrevHeight, buffer[i].thisWidthMinusPrevWidth,       //3
+          buffer[i].thisSizeMinusPrevSize                                                                         //1
+
     );
   }
   bufferIdx = 0;
+  fclose(fp);
 }
 
 void storeCuData(CodingStructure*& tempCS, Partitioner& partitioner)
@@ -207,7 +222,7 @@ void storeCuData(CodingStructure*& tempCS, Partitioner& partitioner)
   int squaredCu   = tempCS->area.lwidth() == tempCS->area.lheight() ? 1 : 0;
 
   buffer[bufferIdx].baseQp               = tempCS->baseQP;
-  buffer[bufferIdx].cost                 = tempCS->cost == MAX_DOUBLE ? 99999999999999999999.0 : tempCS->cost;
+  buffer[bufferIdx].cost                 = tempCS->cost == MAX_DOUBLE ? -1000000 : tempCS->cost;
   buffer[bufferIdx].cuNumberPel          = cuNumberPel;
   buffer[bufferIdx].currBtDepth          = (int) partitioner.currBtDepth;
   buffer[bufferIdx].currDepth            = partitioner.currDepth;
