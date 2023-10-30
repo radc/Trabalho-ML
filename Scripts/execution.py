@@ -3,6 +3,7 @@ import os
 
 ENCODER_PATH = "./../VTM_DataExtraction/bin/EncoderAppStatic"
 AI_CFG_PATH = "../VTM_DataExtraction/cfg/encoder_intra_vtm.cfg"
+FOLDER_CSV = "../Outputs"
 
 QP=["22","27","32","37"]
 VIDEOS = ["vidyo4"]
@@ -35,3 +36,5 @@ for video in VIDEOS :
         EXEC = " ".join(EXEC_STR)
         print(EXEC)
         os.system(EXEC)
+        os.system(f"mv cudata.csv {FOLDER_CSV}/codingdata_{video}_{qp}.csv")
+        os.system(f"mv desfecho.csv {FOLDER_CSV}/encodeddata_{video}_{qp}.csv")
