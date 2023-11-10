@@ -46,6 +46,13 @@
 
 extern void printCuDataBuffer();
 
+typedef struct cu_size {
+  int width;
+  int height;
+} cu_size_t;
+
+cu_size_t prevBlockSize[1000][1000];
+
 #include <math.h>
 
 //! \ingroup EncoderLib
@@ -1567,14 +1574,29 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   int numCUs = pcPic->cs->getNumCu();
   for (int i = 0; i < numCUs; i++)
   {    
-    fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\n",
+    fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
       i,
+      pcPic->getPOC(),
       pcPic->cs->cus[i]->depth,
       pcPic->cs->cus[i]->Y().x,
       pcPic->cs->cus[i]->Y().y,
       pcPic->cs->cus[i]->Y().width,
       pcPic->cs->cus[i]->Y().height
     );
+    
+    int yD = pcPic->cs->cus[i]->Y().y >> 2;
+    int xD = pcPic->cs->cus[i]->Y().x >> 2;
+    int wD = pcPic->cs->cus[i]->Y().width >> 2;
+    int hD = pcPic->cs->cus[i]->Y().height >> 2;
+
+    for (int j = 0; j < hD; j++)
+    {
+      for (int k = 0; k < wD; k++)
+      {
+        prevBlockSize[yD+j][xD+k].height = pcPic->cs->cus[i]->Y().height;
+        prevBlockSize[yD+j][xD+k].width = pcPic->cs->cus[i]->Y().width;
+      }      
+    }    
   }
   fclose(fp); 
   
