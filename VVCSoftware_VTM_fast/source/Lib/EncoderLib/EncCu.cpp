@@ -53,7 +53,7 @@
 #include <cmath>
 #include <algorithm>
 
-static inline int decidir_particionamento(
+static inline int decide_partitioning_fast(
     double cost,
     int cunumberpel,                    
     int currbtdepth,                    
