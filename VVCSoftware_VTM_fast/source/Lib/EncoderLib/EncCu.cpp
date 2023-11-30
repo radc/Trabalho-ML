@@ -53,6 +53,358 @@
 #include <cmath>
 #include <algorithm>
 
+static inline int decidir_particionamento(
+    double cost,
+    int cunumberpel,                    
+    int currbtdepth,                    
+    int currdepth,                      
+    int currmtdepth,                    
+    int currqtdepth,                    
+    int currtrdepth,                    
+    int diagavg,                        
+    int diagsad,                        
+    int diavar,                         
+    int diffminmax,                     
+    int distortion,                     
+    int fracbits,                       
+    int height,                         
+    int max,                            
+    int min,                            
+    int modetype,                       
+    int qp,                             
+    int pelavg,                         
+    int pelcornersavg,                  
+    int peldiffdiagonal,                
+    int peldifffullcorneravg,           
+    int squaredcu,                      
+    int videoresheight,                 
+    int videoreswidth,                  
+    int treetype,                       
+    int width,                          
+    int prevpocheight,                  
+    int prevpocwidth,                   
+    int thisheightminusprevheight,      
+    int thiswidthminusprevwidth,        
+    int thissizeminusprevsize       
+) {
+	if (thissizeminusprevsize <= 256.0) {
+		if (prevpocwidth <= 48.0) {
+			if (diffminmax <= 90.5) {
+				if (cost <= 27313275.0) {
+					if (distortion <= 12245.0) {
+						if (diffminmax <= 67.5) {
+							return 0;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (fracbits <= 1066013.0) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+				else {
+					if (diffminmax <= 70.5) {
+						if (peldifffullcorneravg <= 597.5) {
+							return 1;
+						}
+						else {
+							return 0;
+						}
+					}
+					else {
+						if (cost <= 29497399.0) {
+							return 0;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			}
+			else {
+				if (qp <= 24.5) {
+					if (min <= 352.5) {
+						if (distortion <= 10873.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (diffminmax <= 147.5) {
+							return 0;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+				else {
+					if (diffminmax <= 163.5) {
+						if (fracbits <= 1556264.0) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+					else {
+						if (fracbits <= 1508497.0) {
+							return 0;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			}
+		}
+		else {
+			if (diffminmax <= 90.5) {
+				if (fracbits <= 1319841.5) {
+					if (qp <= 24.5) {
+						if (diffminmax <= 61.5) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+					else {
+						if (diffminmax <= 61.5) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+				else {
+					if (fracbits <= 2184040.5) {
+						if (pelcornersavg <= 511.5) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+					else {
+						if (cost <= 4395015.25) {
+							return 1;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+			}
+			else {
+				if (thiswidthminusprevwidth <= -16.0) {
+					if (diffminmax <= 118.5) {
+						if (fracbits <= 1065558.5) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+					else {
+						if (fracbits <= 9157048.0) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+				else {
+					if (diffminmax <= 166.5) {
+						if (qp <= 29.5) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+					else {
+						if (distortion <= 6104140.5) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+			}
+		}
+	}
+	else {
+		if (diffminmax <= 200.5) {
+			if (thissizeminusprevsize <= 640.0) {
+				if (diffminmax <= 83.5) {
+					if (diffminmax <= 41.5) {
+						if (pelcornersavg <= 42.0) {
+							return 0;
+						}
+						else {
+							return 0;
+						}
+					}
+					else {
+						if (fracbits <= 1618945.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+				else {
+					if (qp <= 29.5) {
+						if (qp <= 24.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (diffminmax <= 142.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			}
+			else {
+				if (diffminmax <= 85.5) {
+					if (videoresheight <= 1620.0) {
+						if (qp <= 24.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (diffminmax <= 71.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+				else {
+					if (qp <= 29.5) {
+						if (diffminmax <= 121.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (diffminmax <= 141.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			}
+		}
+		else {
+			if (thissizeminusprevsize <= 832.0) {
+				if (thissizeminusprevsize <= 640.0) {
+					if (diffminmax <= 301.5) {
+						if (qp <= 34.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (diffminmax <= 556.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+				else {
+					if (diffminmax <= 583.5) {
+						if (diffminmax <= 309.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (diffminmax <= 813.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			}
+			else {
+				if (diffminmax <= 585.5) {
+					if (videoresheight <= 1620.0) {
+						if (diffminmax <= 368.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (cost <= 4517039.25) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+				else {
+					if (videoreswidth <= 2880.0) {
+						if (qp <= 29.5) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+					else {
+						if (cost <= 5429201.25) {
+							return 1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 //! \ingroup EncoderLib
 //! \{
 
