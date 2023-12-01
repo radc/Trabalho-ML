@@ -53,8 +53,119 @@
 #include <cmath>
 #include <algorithm>
 
+#include "prevBlockSize.h"
+
+struct cu_data {
+    int diffMinMax;
+    int distorion;
+    int fracBits;
+    int height;
+    int min;
+    int qp;
+    int pelCornersAverage;
+    int pelDiffFullCornerAvg;
+    int prevPocHeight;            
+    int prevPocWidth;             
+    int thisHeightMinusPrevHeight;
+    int thisWidthMinusPrevWidth;  
+    int thisSizeMinusPrevSize;
+    int prevPocHeight;            
+    int prevPocWidth;             
+    int thisHeightMinusPrevHeight;
+    int thisWidthMinusPrevWidth;  
+    int thisSizeMinusPrevSize;    
+};
+
+static struct cu_data calculate_cu_features(CodingStructure*& tempCS, Partitioner& partitioner)
+{
+  struct cu_data cu_data;
+
+  int  stridee   = (int) tempCS->getOrgBuf().Y().stride;
+  long acc       = 0;
+  long accDiag   = 0;
+  int  diagCount = 0;
+  int  min = 100000, max = -100;
+
+  for (int i = 0; i < (int) tempCS->getOrgBuf().Y().height; i++)
+  {
+    for (int j = 0; j < (int) tempCS->getOrgBuf().Y().width; j++)
+    {
+      Pel currPel = tempCS->getOrgBuf().Y().buf[j + stridee * i];
+      acc += currPel;
+      if (i == j)
+      {
+        accDiag += currPel;
+        diagCount++;
+      }
+      if (currPel > max)
+        max = currPel;
+      if (currPel < min)
+        min = currPel;      
+    }    
+  }
+  int pelAverage  = (int) acc / (tempCS->area.lwidth() * tempCS->area.lheight());
+  int diagAverage = (int) accDiag / diagCount;
+
+  long diagSad = 0;
+  long diagVar = 0;
+  for (int i = 0; i < diagCount; i++)
+  {
+    Pel currPel = tempCS->getOrgBuf().Y().buf[i + stridee * i];
+    diagSad += abs(currPel - diagAverage);
+    diagVar += pow(currPel - diagAverage, 2.0);
+  }
+  diagVar = diagVar / diagCount;
+
+  Pel pelTopLeft    = tempCS->getOrgBuf().Y().buf[0];
+  Pel pelTopRight   = tempCS->getOrgBuf().Y().buf[tempCS->getOrgBuf().Y().width - 1];
+  Pel pelBottomLeft = tempCS->getOrgBuf().Y().buf[stridee * (tempCS->getOrgBuf().Y().height - 1)];
+  Pel pelBottomRight =
+    tempCS->getOrgBuf().Y().buf[stridee * (tempCS->getOrgBuf().Y().height - 1) + tempCS->getOrgBuf().Y().width - 1];
+
+  int pelCornersAverage = (int) (pelTopLeft + pelTopRight + pelBottomLeft + pelBottomRight) >> 2;
+
+  int pelDiffDiagonal = abs(pelTopLeft - pelTopRight) + abs(pelTopLeft - pelBottomLeft)
+                        + abs(pelTopLeft - pelBottomRight) + abs(pelTopRight - pelBottomLeft)
+                        + abs(pelTopRight - pelBottomRight) + abs(pelBottomLeft - pelBottomRight);
+
+  int pelDiffFullCornerAvg = abs(pelCornersAverage - pelDiffDiagonal);
+
+  int poc = tempCS->slice->getPic()->poc;
+  int qp  = tempCS->slice->getSliceQp();
+
+  int cuNumberPel = tempCS->getOrgBuf().Y().width * tempCS->getOrgBuf().Y().height;
+  int squaredCu   = tempCS->area.lwidth() == tempCS->area.lheight() ? 1 : 0;
+
+  cu_data.diffMinMax           = (max - min);
+  cu_data.distorion            = tempCS->dist;
+  cu_data.fracBits             = tempCS->fracBits;
+  cu_data.height               = tempCS->area.lheight();
+  cu_data.min                  = min;
+  cu_data.qp                   = qp;
+  cu_data.pelCornersAverage    = pelCornersAverage;
+  cu_data.pelDiffFullCornerAvg = pelDiffFullCornerAvg;
+
+  if(poc == 0) {
+    cu_data.prevPocHeight             = -1000000;
+    cu_data.prevPocWidth              = -1000000;
+    cu_data.thisHeightMinusPrevHeight = -1000000;
+    cu_data.thisWidthMinusPrevWidth   = -1000000;
+    cu_data.thisSizeMinusPrevSize     = -1000000;
+  }else{
+    cu_data.prevPocHeight             = prevBlockSize[tempCS->area.ly()>>2][tempCS->area.lx()>>2].height;
+    cu_data.prevPocWidth              = prevBlockSize[tempCS->area.ly()>>2][tempCS->area.lx()>>2].width;
+    cu_data.thisHeightMinusPrevHeight = tempCS->area.lheight() - prevBlockSize[tempCS->area.ly()>>2][tempCS->area.lx()>>2].height;
+    cu_data.thisWidthMinusPrevWidth   = tempCS->area.lwidth() - prevBlockSize[tempCS->area.ly()>>2][tempCS->area.lx()>>2].width;
+    cu_data.thisSizeMinusPrevSize     = (tempCS->area.lwidth() * tempCS->area.lheight()) - (prevBlockSize[tempCS->area.ly()>>2][tempCS->area.lx()>>2].height * prevBlockSize[tempCS->area.ly()>>2][tempCS->area.lx()>>2].width);
+  }
+
+  return cu_data;
+}
+
 static inline int decide_partitioning_fast(
     double cost,
+    int cu_height,
+    int cu_width,
     int diffminmax,                     
     int distortion,                     
     int fracbits,                       
@@ -68,322 +179,332 @@ static inline int decide_partitioning_fast(
     int thiswidthminusprevwidth,        
     int thissizeminusprevsize       
 ) {
-	if (thissizeminusprevsize <= 256.0) {
-		if (prevpocwidth <= 48.0) {
-			if (diffminmax <= 90.5) {
-				if (cost <= 27313275.0) {
-					if (distortion <= 12245.0) {
-						if (diffminmax <= 67.5) {
-							return 0;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (fracbits <= 1066013.0) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-				}
-				else {
-					if (diffminmax <= 70.5) {
-						if (peldifffullcorneravg <= 597.5) {
-							return 1;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if (cost <= 29497399.0) {
-							return 0;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-			}
-			else {
-				if (qp <= 24.5) {
-					if (min <= 352.5) {
-						if (distortion <= 10873.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (diffminmax <= 147.5) {
-							return 0;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-				else {
-					if (diffminmax <= 163.5) {
-						if (fracbits <= 1556264.0) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if (fracbits <= 1508497.0) {
-							return 0;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-			}
-		}
-		else {
-			if (diffminmax <= 90.5) {
-				if (fracbits <= 1319841.5) {
-					if (qp <= 24.5) {
-						if (diffminmax <= 61.5) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if (diffminmax <= 61.5) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-				}
-				else {
-					if (fracbits <= 2184040.5) {
-						if (pelcornersavg <= 511.5) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if (cost <= 4395015.25) {
-							return 1;
-						}
-						else {
-							return 0;
-						}
-					}
-				}
-			}
-			else {
-				if (thiswidthminusprevwidth <= -16.0) {
-					if (diffminmax <= 118.5) {
-						if (fracbits <= 1065558.5) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if (fracbits <= 9157048.0) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-				}
-				else {
-					if (diffminmax <= 166.5) {
-						if (qp <= 29.5) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if (distortion <= 6104140.5) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-				}
-			}
-		}
-	}
-	else {
-		if (diffminmax <= 200.5) {
-			if (thissizeminusprevsize <= 640.0) {
-				if (diffminmax <= 83.5) {
-					if (diffminmax <= 41.5) {
-						if (pelcornersavg <= 42.0) {
-							return 0;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if (fracbits <= 1618945.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-				else {
-					if (qp <= 29.5) {
-						if (qp <= 24.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (diffminmax <= 142.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-			}
-			else {
-				if (diffminmax <= 85.5) {
-					if (videoresheight <= 1620.0) {
-						if (qp <= 24.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (diffminmax <= 71.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-				else {
-					if (qp <= 29.5) {
-						if (diffminmax <= 121.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (diffminmax <= 141.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-			}
-		}
-		else {
-			if (thissizeminusprevsize <= 832.0) {
-				if (thissizeminusprevsize <= 640.0) {
-					if (diffminmax <= 301.5) {
-						if (qp <= 34.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (diffminmax <= 556.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-				else {
-					if (diffminmax <= 583.5) {
-						if (diffminmax <= 309.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (diffminmax <= 813.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-			}
-			else {
-				if (diffminmax <= 585.5) {
-					if (videoresheight <= 1620.0) {
-						if (diffminmax <= 368.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (cost <= 4517039.25) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-				else {
-					if (videoreswidth <= 2880.0) {
-						if (qp <= 29.5) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-					else {
-						if (cost <= 5429201.25) {
-							return 1;
-						}
-						else {
-							return 1;
-						}
-					}
-				}
-			}
-		}
-	}
+    // Nós acionamos a árvore somente em blocos quadrados de tamanho 32x32 e 64x64.
+    // Em outros, nós não consideramos pular qualquer parte do processo de codificação.
+    if (cu_height != cu_width || cu_height < 32 || cu_height > 64) {
+          return 1;
+    }
+
+    if (cost < 0) {
+      return 1;
+    }
+
+    if (thissizeminusprevsize <= 256.0) {
+      if (prevpocwidth <= 48.0) {
+        if (diffminmax <= 90.5) {
+          if (cost <= 27313275.0) {
+            if (distortion <= 12245.0) {
+              if (diffminmax <= 67.5) {
+                return 0;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (fracbits <= 1066013.0) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+          }
+          else {
+            if (diffminmax <= 70.5) {
+              if (peldifffullcorneravg <= 597.5) {
+                return 1;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (cost <= 29497399.0) {
+                return 0;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+        }
+        else {
+          if (qp <= 24.5) {
+            if (min <= 352.5) {
+              if (distortion <= 10873.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (diffminmax <= 147.5) {
+                return 0;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+          else {
+            if (diffminmax <= 163.5) {
+              if (fracbits <= 1556264.0) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (fracbits <= 1508497.0) {
+                return 0;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+        }
+      }
+      else {
+        if (diffminmax <= 90.5) {
+          if (fracbits <= 1319841.5) {
+            if (qp <= 24.5) {
+              if (diffminmax <= 61.5) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (diffminmax <= 61.5) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+          }
+          else {
+            if (fracbits <= 2184040.5) {
+              if (pelcornersavg <= 511.5) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (cost <= 4395015.25) {
+                return 1;
+              }
+              else {
+                return 0;
+              }
+            }
+          }
+        }
+        else {
+          if (thiswidthminusprevwidth <= -16.0) {
+            if (diffminmax <= 118.5) {
+              if (fracbits <= 1065558.5) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (fracbits <= 9157048.0) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+          }
+          else {
+            if (diffminmax <= 166.5) {
+              if (qp <= 29.5) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (distortion <= 6104140.5) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+          }
+        }
+      }
+    }
+    else {
+      if (diffminmax <= 200.5) {
+        if (thissizeminusprevsize <= 640.0) {
+          if (diffminmax <= 83.5) {
+            if (diffminmax <= 41.5) {
+              if (pelcornersavg <= 42.0) {
+                return 0;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (fracbits <= 1618945.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+          else {
+            if (qp <= 29.5) {
+              if (qp <= 24.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (diffminmax <= 142.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+        }
+        else {
+          if (diffminmax <= 85.5) {
+            if (videoresheight <= 1620.0) {
+              if (qp <= 24.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (diffminmax <= 71.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+          else {
+            if (qp <= 29.5) {
+              if (diffminmax <= 121.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (diffminmax <= 141.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+        }
+      }
+      else {
+        if (thissizeminusprevsize <= 832.0) {
+          if (thissizeminusprevsize <= 640.0) {
+            if (diffminmax <= 301.5) {
+              if (qp <= 34.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (diffminmax <= 556.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+          else {
+            if (diffminmax <= 583.5) {
+              if (diffminmax <= 309.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (diffminmax <= 813.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+        }
+        else {
+          if (diffminmax <= 585.5) {
+            if (videoresheight <= 1620.0) {
+              if (diffminmax <= 368.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (cost <= 4517039.25) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+          else {
+            if (videoreswidth <= 2880.0) {
+              if (qp <= 29.5) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+            else {
+              if (cost <= 5429201.25) {
+                return 1;
+              }
+              else {
+                return 1;
+              }
+            }
+          }
+        }
+      }
+    }
 }
 
 //! \ingroup EncoderLib
@@ -1242,7 +1363,27 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
-        xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        struct cu_data cu_data =  calculate_cu_features(tempCS, partitioner);
+        if (decide_partitioning_fast(
+            tempCS->cost,
+            tempCS->area.lheight(),
+            tempCS->area.lwidth(),
+            cu_data.diffMinMax,
+            tempCS->dist,                     
+            tempCS->fracBits,                       
+            cu_data.min,                            
+            tempCS->slice->getSliceQp(),                             
+            cu_data.pelCornersAverage,                  
+            cu_data.pelDiffFullCornerAvg,           
+            tempCS->slice->getPPS()->getPicHeightInLumaSamples(),                 
+            tempCS->slice->getPPS()->getPicWidthInLumaSamples(),                  
+            cu_data.prevPocWidth,                  
+            cu_data.thisWidthMinusPrevWidth,        
+            cu_data.thisSizeMinusPrevSize       
+        ))
+        {
+            xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        }
         tempCS->splitRdCostBest = splitRdCostBest;
         //recover cons modes
         tempCS->modeType = partitioner.modeType = modeTypeParent;

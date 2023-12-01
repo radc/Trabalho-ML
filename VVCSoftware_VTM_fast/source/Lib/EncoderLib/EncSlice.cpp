@@ -47,6 +47,8 @@
 
 #include <math.h>
 
+#include "prevBlockSize.h"
+
 //! \ingroup EncoderLib
 //! \{
 
@@ -1560,6 +1562,28 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   m_pcInterSearch->resetUniMvList();
   ::memset(g_isReusedUniMVsFilled, 0, sizeof(g_isReusedUniMVsFilled));
   encodeCtus( pcPic, bCompressEntireSlice, bFastDeltaQP, m_pcLib );
+  
+  // Guardar informações deste bloco em prevBlockSize.
+  {
+    int numCUs = pcPic->cs->getNumCu();
+    for (int i = 0; i < numCUs; i++)
+    {
+      int yD = pcPic->cs->cus[i]->Y().y >> 2;
+      int xD = pcPic->cs->cus[i]->Y().x >> 2;
+      int wD = pcPic->cs->cus[i]->Y().width >> 2;
+      int hD = pcPic->cs->cus[i]->Y().height >> 2;
+
+      for (int j = 0; j < hD; j++)
+      {
+        for (int k = 0; k < wD; k++)
+        {
+          prevBlockSize[yD+j][xD+k].height = pcPic->cs->cus[i]->Y().height;
+          prevBlockSize[yD+j][xD+k].width = pcPic->cs->cus[i]->Y().width;
+        }      
+      }    
+    }
+  }
+
   if (checkPLTRatio)
   {
     m_pcLib->checkPltStats(pcPic);

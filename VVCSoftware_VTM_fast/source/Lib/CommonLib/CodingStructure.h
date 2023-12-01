@@ -219,6 +219,9 @@ public:
     pArray[3] = m_offsets[0]; pArray[4] = m_offsets[1]; pArray[5] = m_offsets[2];
   }
 
+  unsigned getNumCu() {
+       return m_numCUs;
+  }
 
 private:
   void createCoeffs(const bool isPLTused);
