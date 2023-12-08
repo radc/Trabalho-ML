@@ -6,6 +6,6 @@ typedef struct cu_size {
   int height;
 } cu_size_t;
 
-cu_size_t prevBlockSize[1000][1000];
+extern cu_size_t prevBlockSize[1000][1000];
 
 #endif

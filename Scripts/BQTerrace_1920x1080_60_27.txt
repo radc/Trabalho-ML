@@ -6,18 +6,18 @@ TOOL CFG: LFNST:1 MMVD:1 Affine:1 AffineType:1 AdaptBypassAffineMe:0 PROF:0 SbTM
 FAST TOOL CFG: LCTUFast:1 FastMrg:1 MaxMergeRdCandNumTotal:15 MergeRdCandQuotaRegular:4 MergeRdCandQuotaRegularSmallBlk:4 MergeRdCandQuotaSubBlk:2 MergeRdCandQuotaCiip:1 MergeRdCandQuotaGpm:8 PBIntraFast:1 IMV4PelFast:1 MTSMaxCand: 4(intra) 4(inter) ISPFast:1 FastLFNST:1 AMaxBT:1 E0023FastEnc:1 ContentBasedFastQtbt:0 UseNonLinearAlfLuma:1 UseNonLinearAlfChroma:1 MaxNumAlfAlternativesChroma:8 FastMIP:1 TTFastSkip:31 TTFastSkipThr:1.075 FastLocalDualTree:0 RPR:0 TemporalFilter:4/4 SEI CTI:0 BIM:0 SEI FGC:0 SEI processing Order:0 
 
 
- started @ Tue Oct 24 12:14:56 2023
-POC    0 LId:  0 TId: 0 ( IDR_N_LP, I-SLICE, QP 37 )      56496 bits [Y 37.6596 dB    U 44.0202 dB    V 44.1189 dB] [ET    18 ] [L0] [L1]
-POC    1 LId:  0 TId: 0 ( CRA, I-SLICE, QP 37 )      56504 bits [Y 37.6596 dB    U 44.0202 dB    V 44.1189 dB] [ET    18 ] [L0] [L1]
-POC    2 LId:  0 TId: 0 ( CRA, I-SLICE, QP 37 )      56488 bits [Y 37.7107 dB    U 44.3096 dB    V 44.2062 dB] [ET    18 ] [L0] [L1]
-POC    3 LId:  0 TId: 0 ( CRA, I-SLICE, QP 37 )      56232 bits [Y 37.7171 dB    U 44.2238 dB    V 44.0251 dB] [ET    18 ] [L0] [L1]
-POC    4 LId:  0 TId: 0 ( CRA, I-SLICE, QP 37 )      55816 bits [Y 37.7629 dB    U 44.3779 dB    V 44.0485 dB] [ET    18 ] [L0] [L1]
+ started @ Mon Nov 27 13:41:02 2023
+POC    0 LId:  0 TId: 0 ( IDR_N_LP, I-SLICE, QP 27 )    1486192 bits [Y 38.4118 dB    U 41.1854 dB    V 43.3701 dB] [ET   258 ] [L0] [L1]
+POC    1 LId:  0 TId: 0 ( CRA, I-SLICE, QP 27 )    1480624 bits [Y 38.4049 dB    U 41.2001 dB    V 43.3948 dB] [ET   257 ] [L0] [L1]
+POC    2 LId:  0 TId: 0 ( CRA, I-SLICE, QP 27 )    1474672 bits [Y 38.4072 dB    U 41.2091 dB    V 43.3726 dB] [ET   253 ] [L0] [L1]
+POC    3 LId:  0 TId: 0 ( CRA, I-SLICE, QP 27 )    1478952 bits [Y 38.4073 dB    U 41.2330 dB    V 43.4069 dB] [ET   256 ] [L0] [L1]
+POC    4 LId:  0 TId: 0 ( CRA, I-SLICE, QP 27 )    1478432 bits [Y 38.4131 dB    U 41.1946 dB    V 43.3972 dB] [ET   262 ] [L0] [L1]
 
-Memory Usage: VmPeak= 576560 KB ( 0.5 GiB ),  VmHWM= 398484 KB ( 0.4 GiB )
+Memory Usage: VmPeak= 889600 KB ( 0.8 GiB ),  VmHWM= 703352 KB ( 0.7 GiB )
 
 LayerId  0
 	Total Frames |  Bitrate      Y-PSNR   U-PSNR   V-PSNR   YUV-PSNR 
-	5            a  3378.4320    37.7020  44.1903  44.1035  38.9962  
+	5            a  88786.4640   38.4089  41.2044  43.3883  39.3392  
 
- finished @ Tue Oct 24 12:16:27 2023
- Total Time:       91.008 sec. [user]       91.010 sec. [elapsed]
+ finished @ Mon Nov 27 14:02:31 2023
+ Total Time:     1288.378 sec. [user]     1288.420 sec. [elapsed]

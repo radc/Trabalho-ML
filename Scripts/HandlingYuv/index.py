@@ -13,7 +13,7 @@ def tracelines(yuv,x,y,w,h) :
     
     
 
-yuv_frame = yuvio.imread("../../../Sequences/vidyo4_720p_60.yuv", 1280, 720, "yuv420p")
+yuv_frame = yuvio.imread("/home/ruhan/Trabalho-ML/Sequences/Johnny_1280x720_60.yuv", 1280, 720, "yuv420p")
 y = yuv_frame.y
 u = yuv_frame.u
 v = yuv_frame.v
@@ -35,8 +35,12 @@ yuv444[:,:,0] = y
 yuv444[:,:,1] = u2
 yuv444[:,:,2] = v2
 
-df = pd.read_csv("desfecho.csv",delimiter="\t",header=None,names=['idx','depth','x','y','width','height'])
+df = pd.read_csv("/home/ruhan/Trabalho-ML/Outputs/encodeddata_Johnny_1280x720_60_37.csv",delimiter="\t",header=None,names=['idx','poc','depth','x','y','width','height'])
 for i in range(len(df)):
+    poc = df.loc[i]['poc']
+    
+    if(poc) :
+        break
     x = df.loc[i]['x']
     y = df.loc[i]['y']
     w = df.loc[i]['width']
